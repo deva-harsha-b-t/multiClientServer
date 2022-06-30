@@ -17,6 +17,7 @@ class Client:
 
         msg = tkinter.Tk()
         msg.withdraw()
+        msg.geometry("800x600")
         self.name = simpledialog.askstring(
             "Name", "Enter your name", parent=msg)
         self.gui_done = False
