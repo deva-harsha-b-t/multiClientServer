@@ -1,6 +1,7 @@
 import socket
 import threading
-from concurrent.futures import ThreadPoolExecutor
+import select
+# from concurrent.futures import ThreadPoolExecutor
 
 PORT = 9090
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -10,6 +11,8 @@ FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "disconnect"
 DEFAULT_RESPONSE = "hello from server"
 THREAD_POOL_NO = 20
+connections = []
+addrs = []
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverSocket.bind(ADDR)
@@ -18,6 +21,22 @@ serverSocket.bind(ADDR)
 def send_mess(conn, msg):
     message = msg.encode(FORMAT)
     conn.send(message)
+
+
+def handel_connectins():
+    while True:
+        if len(connections) > 0:
+            readables, writeables, errors = select.select(
+                connections, connections, connections, 1.0)
+
+            for conn_r in readables:
+                mess_ = conn_r.recv(HEADER).decode(FORMAT)
+                for conn_s in writeables:
+                    conn_s.send(mess_.encode(FORMAT))
+                print(mess_)
+
+            # for conn_e in errors:
+            #     print(f'error: {conn_e}')
 
 
 def handle_conn(conn, addr):
@@ -38,14 +57,19 @@ def handle_conn(conn, addr):
 def start():
     serverSocket.listen()
     print(f"[Server {SERVER} is listening]")
-    executor = ThreadPoolExecutor(max_workers=THREAD_POOL_NO)
+    con_thread = threading.Thread(target=handel_connectins, args=())
+    con_thread.start()
+    # executor = ThreadPoolExecutor(max_workers=THREAD_POOL_NO)
     while True:
         conn, addr = serverSocket.accept()
+        connections.append(conn)
+        addrs.append(addr)
+
         # print(f"connected to {addr}")
         # thread = threading.Thread(target=handle_conn, args=(conn, addr))
         # thread.start()
-        thread = executor.submit(handle_conn, (conn, addr))
-        executor.map(handle_conn, range(30))
+        # thread = executor.submit(handle_conn, (conn, addr))
+        # executor.map(handle_conn, range(30))
         # print(f"[current connections: {threading.active_count() -1 }]")
 
 
