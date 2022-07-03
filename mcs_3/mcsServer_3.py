@@ -39,19 +39,19 @@ def handel_connectins():
             #     print(f'error: {conn_e}')
 
 
-def handle_conn(conn, addr):
-    print(f"[connection : {addr} connected]")
+# def handle_conn(conn, addr):
+#     print(f"[connection : {addr} connected]")
 
-    connected = True
-    while connected:
-        mess_ = conn.recv(HEADER).decode(FORMAT)
-        if mess_:
-            if mess_ == DISCONNECT_MESSAGE:
-                connected = False
-            print(f"[{addr}] {mess_}")
-        # mssg = input("Enter message: ")
-        send_mess(conn, DEFAULT_RESPONSE)
-    conn.close()
+#     connected = True
+#     while connected:
+#         mess_ = conn.recv(HEADER).decode(FORMAT)
+#         if mess_:
+#             if mess_ == DISCONNECT_MESSAGE:
+#                 connected = False
+#             print(f"[{addr}] {mess_}")
+#         # mssg = input("Enter message: ")
+#         send_mess(conn, DEFAULT_RESPONSE)
+#     conn.close()
 
 
 def start():
