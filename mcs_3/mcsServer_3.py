@@ -20,7 +20,10 @@ serverSocket.bind(ADDR)
 
 def send_mess(conn, msg):
     message = msg.encode(FORMAT)
-    conn.send(message)
+    try:
+        conn.send(message)
+    except:
+        pass
 
 
 def handel_connectins():
@@ -31,8 +34,12 @@ def handel_connectins():
 
             for conn_r in readables:
                 mess_ = conn_r.recv(HEADER).decode(FORMAT)
-                for conn_s in writeables:
-                    conn_s.send(mess_.encode(FORMAT))
+                if mess_ == DISCONNECT_MESSAGE:
+                    connections.remove(conn_r)
+                    pass
+                else:
+                    for conn_s in writeables:
+                        conn_s.send(mess_.encode(FORMAT))
                 print(mess_)
 
             # for conn_e in errors:

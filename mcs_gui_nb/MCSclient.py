@@ -48,7 +48,8 @@ class Client:
         self.msg_label.pack(padx=20, pady=5)
 
         self.msg_input = tkinter.Text(
-            self.window, height=2, bg="#2a282b", fg="white", font=("Arial", 12, "bold"))
+            self.window, height=2, bg="#2a282b", fg="white",insertbackground='white',
+             font=("Arial", 12, "bold"))
         self.msg_input.pack(padx=20, pady=5)
 
         self.send_btn = tkinter.Button(

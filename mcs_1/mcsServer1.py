@@ -15,7 +15,11 @@ serverSocket.bind(ADDR)
 
 def send_mess(conn, msg):
     message = msg.encode(FORMAT)
-    conn.send(message)
+    try:
+        conn.send(message)
+        return 0
+    except BrokenPipeError:
+        return -1
 
 
 def handle_conn(conn, addr):
@@ -29,7 +33,9 @@ def handle_conn(conn, addr):
                 connected = False
             print(f"[{addr}] {mess_}")
         # mssg = input("Enter message: ")
-        send_mess(conn, DEFAULT_RESPONSE)
+        if send_mess(conn, DEFAULT_RESPONSE) == -1:
+            print(f"client {addr} disconnected")
+            break
     conn.close()
 
 

@@ -1,7 +1,7 @@
 import socket
 
 PORT = 9090
-SERVER = "192.168.56.1"
+SERVER = "127.0.1.1"
 HEADER = 64
 FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "disconnect"

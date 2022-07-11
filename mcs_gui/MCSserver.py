@@ -1,7 +1,7 @@
 import socket
 import threading
 
-HOST = "127.0.0.1"
+HOST = "127.0.1.1"
 FORMAT = "utf-8"
 PORT = 9090
 clients = []
