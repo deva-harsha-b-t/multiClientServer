@@ -3,10 +3,13 @@ import threading
 import tkinter
 import tkinter.scrolledtext
 from tkinter import simpledialog
+import time
+import sys
 
 HOST = "127.0.1.1"
-PORT = 9090
+PORT = 9095
 FORMAT = "utf-8"
+PING_CODE = "pingCheck"
 
 
 class Client:
@@ -14,6 +17,7 @@ class Client:
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host, port))
+        self.server_down_cnt = 1
 
         msg = tkinter.Tk()
         msg.withdraw()
@@ -25,8 +29,10 @@ class Client:
 
         gui_therad = threading.Thread(target=self.gui_)
         recv_therad = threading.Thread(target=self.recv_)
+        down_thread = threading.Thread(target=self.ping_)
         gui_therad.start()
         recv_therad.start()
+        down_thread.start()
 
     def gui_(self):
         self.window = tkinter.Tk(className=self.name)
@@ -61,9 +67,36 @@ class Client:
         self.window.protocol("WM_DELETE_WINDOW", self.stop)
         self.window.mainloop()
 
+
+    def server_down_close(self):
+        print("--- closing client ---\n3")
+        time.sleep(1)
+        print("2")
+        time.sleep(1)
+        print("1")
+        time.sleep(1)
+        self.running = False
+        self.window.destroy()
+        sys.exit()
+        
+    def ping_(self):
+        while True:
+            try:
+                self.sock.send(PING_CODE.encode(FORMAT))
+                time.sleep(5)
+            except Exception as e:
+                self.server_down_close()
+
     def write(self):
         message = f"{self.name}: {self.msg_input.get('1.0', 'end')}"
-        self.sock.send(message.encode(FORMAT))
+        try:
+            self.sock.send(message.encode(FORMAT))
+        except BrokenPipeError:
+            print("----- server is down -----")
+            self.server_down_cnt = self.server_down_cnt - 1
+            if self.server_down_cnt <= 0:
+                self.server_down_close()
+                
         self.msg_input.delete('1.0', 'end')
 
     def recv_(self):
@@ -90,14 +123,14 @@ class Client:
                 print("error")
                 self.sock.close()
                 exit(0)
-                break
+
 
     def stop(self):
         # self.sock.send(f"{self.name} disconnected".encode(FORMAT))
         self.running = False
         self.window.destroy()
         self.sock.close()
-        exit(0)
+        exit()
 
 
 client = Client(HOST, PORT)

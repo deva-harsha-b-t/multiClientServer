@@ -1,15 +1,19 @@
+from distutils.log import error
+from logging import exception
 import socket
 import threading
 import select
+import sys
 
 HOST = "127.0.1.1"
 FORMAT = "utf-8"
-PORT = 9090
+PORT = 9095
 clients = []
 names = []
 connections = []
 DISCONNECT_MESSAGE = "disconnect"
 HEADER = 1024
+PING_CODE = "pingCheck"
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,21 +48,34 @@ server.listen()
 def handel_connectins():
     while True:
         if len(connections) > 0:
-            try:
                 readables, writeables, errors = select.select(
                     connections, connections, connections, 1.0)
 
                 for conn_r in readables:
-                    mess_ = conn_r.recv(HEADER).decode(FORMAT)
-                    if mess_ == DISCONNECT_MESSAGE:
-                        connections.remove(conn_r)
+                    try:
+                        mess_ = conn_r.recv(HEADER).decode(FORMAT)
+                        if mess_ == PING_CODE:
+                            pass
+                        else:
+                            for conn_s in writeables:
+                                try:
+                                    conn_s.send(mess_.encode(FORMAT))
+                                except BrokenPipeError:
+                                    pass
+                        if mess_:
+                            print(mess_)
+                    except Exception as error:
+                        print(error)
+                        print("--- error ---")
+                for err in errors:
+                    try:
+                        print(f"error in connection {err}")
+                        connections.remove(err)
+                        err.close()
+                    except:
                         pass
-                    else:
-                        for conn_s in writeables:
-                            conn_s.send(mess_.encode(FORMAT))
-                    print(mess_)
-            except :
-                print("--- error ---")
+
+
 # recv
 
 

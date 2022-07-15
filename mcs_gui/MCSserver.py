@@ -44,7 +44,6 @@ def receive():
     while True:
         client, addr = server.accept()
         print(f"connectd {str(addr)}")
-
         client.send("Name".encode(FORMAT))
         name = client.recv(1024).decode(FORMAT)
         # name = name.decode("utf-8")
