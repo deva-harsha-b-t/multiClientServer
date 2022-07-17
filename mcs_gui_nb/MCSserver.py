@@ -56,12 +56,17 @@ def handel_connectins():
                         mess_ = conn_r.recv(HEADER).decode(FORMAT)
                         if mess_ == PING_CODE:
                             pass
-                        else:
+                        elif mess_:
                             for conn_s in writeables:
                                 try:
                                     conn_s.send(mess_.encode(FORMAT))
                                 except BrokenPipeError:
                                     pass
+                        else:
+                            print('Disconnected',conn_r)
+                            if conn_r in connections:
+                                connections.remove(conn_r)
+                            conn_r.close()
                         if mess_:
                             print(mess_)
                     except Exception as error:
